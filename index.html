@@ -28,15 +28,15 @@
   <p id="emailMessage">You will no longer receive emails from us.</p>
   <p class="error" id="errorMessage"></p>
 
-  <!-- Scroll to Resubscribe Button -->
+  <!-- Resubscribe Button -->
   <div class="text-center mt-4">
-    <button class="btn btn-outline-primary" onclick="document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });">
+    <button class="btn btn-outline-primary" onclick="showForm()">
       Resubscribe
     </button>
   </div>
 
-  <!-- Resubscribe Form -->
-  <div class="row justify-content-center mt-5">
+  <!-- Hidden Resubscribe Form -->
+  <div class="row justify-content-center mt-5" id="resubscribe-form" style="display: none;">
     <div class="col-md-6">
       <div class="card shadow">
         <div class="card-body">
@@ -63,7 +63,12 @@
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="privacy-agreement" required>
                 <label class="form-check-label" for="privacy-agreement">
-                  I agree to the <a href="https://docs.google.com/document/d/16zg0_gahDr-xdn_qb50i0LVk-xdfRmQb-PMIEfcgZRY/view" class="text-decoration-none" target="_blank">Privacy Policy</a> and consent to receive emails
+                  I agree to the 
+                  <a href="https://docs.google.com/document/d/16zg0_gahDr-xdn_qb50i0LVk-xdfRmQb-PMIEfcgZRY/export?format=pdf" 
+                     class="text-decoration-none" target="_blank">
+                    Privacy Policy (PDF)
+                  </a> 
+                  and consent to receive emails
                 </label>
               </div>
             </div>
@@ -124,6 +129,13 @@
     nameInput.addEventListener('input', validateForm);
     emailInput.addEventListener('input', validateForm);
     checkbox.addEventListener('change', validateForm);
+
+    // Show form when Resubscribe button is clicked
+    function showForm() {
+      const form = document.getElementById('resubscribe-form');
+      form.style.display = 'block';
+      form.scrollIntoView({ behavior: 'smooth' });
+    }
   </script>
 </body>
 </html>

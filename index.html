@@ -28,7 +28,7 @@
   <p class="error" id="errorMessage"></p>
 
   <div class="text-center mt-4">
-    <button class="btn btn-outline-primary" id="resubscribeBtn">Resubscribe</button>
+    <button class="btn btn-outline-primary" id="resubscribeBtn" type="button">Resubscribe</button>
   </div>
 
   <!-- Modal -->
@@ -133,15 +133,15 @@
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({ name, email, type: 'resubscribe' })
         })
-        .then(res => res.text())
-        .then(msg => {
-          console.log("Server response:", msg);
-          if (msg.includes("Success")) {
+        .then(res => res.json())
+        .then(data => {
+          console.log("Server response:", data);
+          if (data.status === "success") {
             modal.hide();
             emailMessage.textContent = `Thank you ${name}, you have successfully resubscribed with ${email}.`;
             errorMessage.textContent = '';
           } else {
-            errorMessage.textContent = 'There was a problem resubscribing. Please try again later.';
+            errorMessage.textContent = data.message || 'There was a problem resubscribing. Please try again later.';
           }
         })
         .catch(err => {

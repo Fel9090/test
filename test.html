@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Unsubscribe Confirmation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      color: #333;
+    }
+    p {
+      font-size: 18px;
+      color: #666;
+    }
+    .resubscribe {
+      margin-top: 30px;
+      font-size: 16px;
+    }
+    a {
+      color: #0078D4;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>You’ve successfully unsubscribed</h1>
+  <p id="emailMessage">You will no longer receive emails from us.</p>
+  <div class="resubscribe">
+    <p>Changed your mind? <a href="https://unicorn_financial_solutions.com/resubscribe">Click here to resubscribe</a>.</p>
+  </div>
+
+  <script>
+    // Get email from URL
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get('email');
+
+    // Show email in message (optional)
+    if (email) {
+      document.getElementById('emailMessage').textContent = `You (${email}) will no longer receive emails from us.`;
+    }
+
+    // Send to backend (replace with your actual endpoint)
+    if (email) {
+      fetch('https://your-backend.com/api/unsubscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, timestamp: new Date().toISOString() })
+      }).catch(err => console.error('Unsubscribe logging failed:', err));
+    }
+  </script>
+</body>
+</html>

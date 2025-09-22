@@ -49,7 +49,7 @@
             <i class="fas fa-envelope fa-3x text-primary mb-2"></i>
             <p class="text-muted">Stay updated with our latest news and updates</p>
           </div>
-          <form method="POST" novalidate>
+          <form id="resubscribeForm" novalidate>
             <input id="csrf_token" name="csrf_token" type="hidden" value="IjFlZjkx...">
 
             <div class="mb-3">
@@ -101,7 +101,6 @@
         }
       });
 
-      // Fallback link trigger
       fallbackLink.addEventListener('click', function (e) {
         e.preventDefault();
         modalElement.style.display = 'block';
@@ -125,18 +124,42 @@
       emailInput.addEventListener('input', validateForm);
       checkbox.addEventListener('change', validateForm);
 
+      // Handle form submission to Google Apps Script
+      const form = document.getElementById('resubscribeForm');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+
+        fetch('YOUR_SCRIPT_URL', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ name, email, type: 'resubscribe' })
+        })
+        .then(res => res.text())
+        .then(msg => {
+          alert('Submitted: ' + msg);
+          modal.hide();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('There was a problem. Please try again later.');
+        });
+      });
+
       // Unsubscribe logging
       const params = new URLSearchParams(window.location.search);
-      const email = params.get('email');
+      const emailParam = params.get('email');
       const emailMessage = document.getElementById('emailMessage');
       const errorMessage = document.getElementById('errorMessage');
 
-      if (email) {
-        emailMessage.textContent = `You (${email}) will no longer receive emails from us.`;
-        fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
+      if (emailParam) {
+        emailMessage.textContent = `You (${emailParam}) will no longer receive emails from us.`;
+        fetch('YOUR_SCRIPT_URL', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email, timestamp: new Date().toISOString() })
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ email: emailParam, type: 'unsubscribe' })
         }).catch(() => {
           console.warn('Unsubscribe logging failed silently.');
         });

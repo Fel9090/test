@@ -20,15 +20,28 @@
       margin-top: 20px;
       text-align: center;
     }
+    .alert {
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    #loadingSpinner {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <h1>You’ve successfully unsubscribed</h1>
   <p id="emailMessage">You will no longer receive emails from us.</p>
-  <p class="error" id="errorMessage"></p>
+
+  <div class="alert alert-success d-none" id="successAlert" role="alert"></div>
+  <div class="alert alert-danger d-none" id="errorAlert" role="alert"></div>
 
   <div class="text-center mt-4">
     <button class="btn btn-outline-primary" id="resubscribeBtn" type="button">Resubscribe</button>
+  </div>
+
+  <div class="text-center mt-3" id="loadingSpinner">
+    <div class="spinner-border text-primary" role="status"></div>
   </div>
 
   <!-- Modal -->
@@ -89,7 +102,9 @@
       const submitBtn = document.getElementById('submit');
       const form = document.getElementById('resubscribeForm');
       const emailMessage = document.getElementById('emailMessage');
-      const errorMessage = document.getElementById('errorMessage');
+      const successAlert = document.getElementById('successAlert');
+      const errorAlert = document.getElementById('errorAlert');
+      const loadingSpinner = document.getElementById('loadingSpinner');
 
       const params = new URLSearchParams(window.location.search);
       const emailParam = params.get('email');
@@ -111,11 +126,26 @@
 
       resubscribeBtn.addEventListener('click', () => modal.show());
 
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
       function validateForm() {
         const nameValid = nameInput.value.trim().length >= 2;
-        const emailValid = emailInput.validity.valid;
+        const emailValid = isValidEmail(emailInput.value.trim());
         const checkboxChecked = checkbox.checked;
         submitBtn.disabled = !(nameValid && emailValid && checkboxChecked);
+      }
+
+      function showAlert(type, message) {
+        const alertEl = type === 'success' ? successAlert : errorAlert;
+        alertEl.textContent = message;
+        alertEl.classList.remove('d-none');
+        setTimeout(() => alertEl.classList.add('d-none'), 5000);
+      }
+
+      function toggleSpinner(show) {
+        loadingSpinner.style.display = show ? 'block' : 'none';
       }
 
       nameInput.addEventListener('input', validateForm);
@@ -128,6 +158,8 @@
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
 
+        toggleSpinner(true);
+
         fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -135,18 +167,19 @@
         })
         .then(res => res.json())
         .then(data => {
-          console.log("Server response:", data);
+          toggleSpinner(false);
           if (data.status === "success") {
             modal.hide();
             emailMessage.textContent = `Thank you ${name}, you have successfully resubscribed with ${email}.`;
-            errorMessage.textContent = '';
+            showAlert('success', data.message);
           } else {
-            errorMessage.textContent = data.message || 'There was a problem resubscribing. Please try again later.';
+            showAlert('error', data.message || 'There was a problem resubscribing.');
           }
         })
         .catch(err => {
+          toggleSpinner(false);
           console.error(err);
-          errorMessage.textContent = 'There was a problem resubscribing. Please try again later.';
+          showAlert('error', 'There was a problem resubscribing. Please try again later.');
         });
       });
     });

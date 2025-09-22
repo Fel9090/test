@@ -29,9 +29,6 @@
 
   <div class="text-center mt-4">
     <button class="btn btn-outline-primary" id="resubscribeBtn">Resubscribe</button>
-    <p class="mt-2">
-      If the button doesn't work, <a href="#" id="fallbackLink">click here to resubscribe</a>
-    </p>
   </div>
 
   <!-- Modal -->
@@ -83,7 +80,6 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const resubscribeBtn = document.getElementById('resubscribeBtn');
-      const fallbackLink = document.getElementById('fallbackLink');
       const modalElement = document.getElementById('resubscribeModal');
       const modal = new bootstrap.Modal(modalElement);
 
@@ -114,10 +110,6 @@
       }
 
       resubscribeBtn.addEventListener('click', () => modal.show());
-      fallbackLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        modal.show();
-      });
 
       function validateForm() {
         const nameValid = nameInput.value.trim().length >= 2;
@@ -149,7 +141,7 @@
             emailMessage.textContent = `Thank you ${name}, you have successfully resubscribed with ${email}.`;
             errorMessage.textContent = '';
           } else {
-            errorMessage.textContent = 'There was a problem: ' + msg;
+            errorMessage.textContent = 'There was a problem resubscribing. Please try again later.';
           }
         })
         .catch(err => {

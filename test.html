@@ -29,28 +29,24 @@
 </head>
 <body>
   <h1>You’ve successfully unsubscribed</h1>
-  <p>You will no longer receive emails from us.</p>
+  <p id="emailMessage">You will no longer receive emails from us.</p>
   <div class="resubscribe">
     <p>Changed your mind? <a href="https://unicorn_financial_solutions.com/resubscribe">Click here to resubscribe</a>.</p>
-  </div
+  </div>
 
   <script>
-    // Get email from URL
     const params = new URLSearchParams(window.location.search);
     const email = params.get('email');
 
-    // Show email in message (optional)
     if (email) {
       document.getElementById('emailMessage').textContent = `You (${email}) will no longer receive emails from us.`;
-    }
 
-    // Send to backend (replace with your actual endpoint)
-    if (email) {
       fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
-       method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email: email, timestamp: new Date().toISOString() })
-});
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, timestamp: new Date().toISOString() })
+      });
+    }
   </script>
 </body>
 </html>

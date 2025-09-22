@@ -111,7 +111,7 @@
         fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ email: emailParam, type: 'unsubscribe' })
+          body: new URLSearchParams({ name: 'Anonymous', email: emailParam, type: 'unsubscribe' })
         }).catch(() => {
           console.warn('Unsubscribe logging failed silently.');
         });

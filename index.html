@@ -15,11 +15,6 @@
     h1, p {
       text-align: center;
     }
-    .error {
-      color: red;
-      margin-top: 20px;
-      text-align: center;
-    }
     .alert {
       max-width: 600px;
       margin: 20px auto;
@@ -165,15 +160,26 @@
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({ name, email, type: 'resubscribe' })
         })
-        .then(res => res.json())
-        .then(data => {
+        .then(res => res.text())
+        .then(text => {
           toggleSpinner(false);
-          if (data.status === "success") {
+          let status = 'error';
+          let message = 'There was a problem resubscribing.';
+
+          try {
+            const data = JSON.parse(text);
+            status = data.status;
+            message = data.message;
+          } catch (err) {
+            console.warn('Response was not valid JSON:', text);
+          }
+
+          if (status === 'success') {
             modal.hide();
             emailMessage.textContent = `Thank you ${name}, you have successfully resubscribed with ${email}.`;
-            showAlert('success', data.message);
+            showAlert('success', message);
           } else {
-            showAlert('error', data.message || 'There was a problem resubscribing.');
+            showAlert('error', message);
           }
         })
         .catch(err => {

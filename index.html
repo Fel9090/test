@@ -29,9 +29,9 @@
   <p class="error" id="errorMessage"></p>
 
   <!-- Resubscribe Button -->
-<div class="text-center mt-4">
-  <button class="btn btn-outline-primary" id="resubscribeBtn">Resubscribe</button>
-</div>
+  <div class="text-center mt-4">
+    <button class="btn btn-outline-primary" id="resubscribeBtn">Resubscribe</button>
+  </div>
 
   <!-- Modal with Resubscribe Form -->
   <div class="modal fade" id="resubscribeModal" tabindex="-1" aria-labelledby="resubscribeModalLabel" aria-hidden="true">
@@ -83,24 +83,11 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const resubscribeBtn = document.getElementById('resubscribeBtn');
-      const fallbackLink = document.getElementById('fallbackLink');
       const modalElement = document.getElementById('resubscribeModal');
       const modal = new bootstrap.Modal(modalElement);
 
       resubscribeBtn.addEventListener('click', function () {
-        try {
-          modal.show();
-        } catch (e) {
-          console.warn('Modal failed, showing inline fallback.');
-          modalElement.style.display = 'block';
-          modalElement.scrollIntoView({ behavior: 'smooth' });
-        }
-      });
-
-      fallbackLink.addEventListener('click', function (e) {
-        e.preventDefault();
-        modalElement.style.display = 'block';
-        modalElement.scrollIntoView({ behavior: 'smooth' });
+        modal.show();
       });
 
       const nameInput = document.getElementById('name');

@@ -143,9 +143,14 @@
         })
         .then(res => res.text())
         .then(msg => {
-          modal.hide();
-          emailMessage.textContent = `Thank you ${name}, you have successfully resubscribed with ${email}.`;
-          errorMessage.textContent = '';
+          console.log("Server response:", msg);
+          if (msg.includes("Success")) {
+            modal.hide();
+            emailMessage.textContent = `Thank you ${name}, you have successfully resubscribed with ${email}.`;
+            errorMessage.textContent = '';
+          } else {
+            errorMessage.textContent = 'There was a problem: ' + msg;
+          }
         })
         .catch(err => {
           console.error(err);

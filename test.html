@@ -46,7 +46,7 @@
 
     // Send to backend (replace with your actual endpoint)
     if (email) {
-      fetch('https://your-backend.com/api/unsubscribe', {
+      fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email, timestamp: new Date().toISOString() })

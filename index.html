@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Unsubscribe Confirmation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,27 +26,56 @@
       color: #0078D4;
       text-decoration: none;
     }
+    .error {
+      color: red;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <h1>You’ve successfully unsubscribed</h1>
   <p id="emailMessage">You will no longer receive emails from us.</p>
+
   <div class="resubscribe">
-    <p>Changed your mind? <a href="https://unicorn_financial_solutions.com/resubscribe">Click here to resubscribe</a>.</p>
+    <p>Changed your mind? 
+      <a href="https://unicorn_financial_solutions.com/resubscribe">Click here to resubscribe</a>.
+    </p>
   </div>
 
+  <p class="error" id="errorMessage"></p>
+
   <script>
+    // Get email from URL query string
     const params = new URLSearchParams(window.location.search);
     const email = params.get('email');
+    const emailMessage = document.getElementById('emailMessage');
+    const errorMessage = document.getElementById('errorMessage');
 
     if (email) {
-      document.getElementById('emailMessage').textContent = `You (${email}) will no longer receive emails from us.`;
+      // Show personalized message
+      emailMessage.textContent = `You (${email}) will no longer receive emails from us.`;
 
+      // Send unsubscribe log to backend
       fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, timestamp: new Date().toISOString() })
+        body: JSON.stringify({
+          email: email,
+          timestamp: new Date().toISOString()
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to log unsubscribe');
+        }
+        console.log('Unsubscribe logged successfully');
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        errorMessage.textContent = 'There was a problem logging your unsubscribe. Please try again later.';
       });
+    } else {
+      emailMessage.textContent = 'You will no longer receive emails from us. (No email address detected)';
     }
   </script>
 </body>

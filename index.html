@@ -29,8 +29,12 @@
 
   <div class="text-center mt-4">
     <button class="btn btn-outline-primary" id="resubscribeBtn">Resubscribe</button>
+    <p class="mt-2">
+      If the button doesn't work, <a href="#" id="fallbackLink">click here to resubscribe</a>
+    </p>
   </div>
 
+  <!-- Modal -->
   <div class="modal fade" id="resubscribeModal" tabindex="-1" aria-labelledby="resubscribeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -79,15 +83,41 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const resubscribeBtn = document.getElementById('resubscribeBtn');
+      const fallbackLink = document.getElementById('fallbackLink');
       const modalElement = document.getElementById('resubscribeModal');
       const modal = new bootstrap.Modal(modalElement);
-
-      resubscribeBtn.addEventListener('click', () => modal.show());
 
       const nameInput = document.getElementById('name');
       const emailInput = document.getElementById('email');
       const checkbox = document.getElementById('privacy-agreement');
       const submitBtn = document.getElementById('submit');
+      const form = document.getElementById('resubscribeForm');
+      const emailMessage = document.getElementById('emailMessage');
+      const errorMessage = document.getElementById('errorMessage');
+
+      const params = new URLSearchParams(window.location.search);
+      const emailParam = params.get('email');
+
+      if (emailParam) {
+        emailMessage.textContent = `You (${emailParam}) will no longer receive emails from us.`;
+        emailInput.value = emailParam;
+
+        fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ email: emailParam, type: 'unsubscribe' })
+        }).catch(() => {
+          console.warn('Unsubscribe logging failed silently.');
+        });
+      } else {
+        emailMessage.textContent = 'You will no longer receive emails from us. (No email address detected)';
+      }
+
+      resubscribeBtn.addEventListener('click', () => modal.show());
+      fallbackLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.show();
+      });
 
       function validateForm() {
         const nameValid = nameInput.value.trim().length >= 2;
@@ -100,7 +130,6 @@
       emailInput.addEventListener('input', validateForm);
       checkbox.addEventListener('change', validateForm);
 
-      const form = document.getElementById('resubscribeForm');
       form.addEventListener('submit', function (e) {
         e.preventDefault();
 
@@ -114,32 +143,15 @@
         })
         .then(res => res.text())
         .then(msg => {
-          alert('Submitted: ' + msg);
           modal.hide();
+          emailMessage.textContent = `Thank you ${name}, you have successfully resubscribed with ${email}.`;
+          errorMessage.textContent = '';
         })
         .catch(err => {
           console.error(err);
-          alert('There was a problem. Please try again later.');
+          errorMessage.textContent = 'There was a problem resubscribing. Please try again later.';
         });
       });
-
-      const params = new URLSearchParams(window.location.search);
-      const emailParam = params.get('email');
-      const emailMessage = document.getElementById('emailMessage');
-      const errorMessage = document.getElementById('errorMessage');
-
-      if (emailParam) {
-        emailMessage.textContent = `You (${emailParam}) will no longer receive emails from us.`;
-        fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ email: emailParam, type: 'unsubscribe' })
-        }).catch(() => {
-          console.warn('Unsubscribe logging failed silently.');
-        });
-      } else {
-        emailMessage.textContent = 'You will no longer receive emails from us. (No email address detected)';
-      }
     });
   </script>
 </body>

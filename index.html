@@ -90,7 +90,6 @@
       const modalElement = document.getElementById('resubscribeModal');
       const modal = new bootstrap.Modal(modalElement);
 
-      // Manual modal trigger
       resubscribeBtn.addEventListener('click', function () {
         try {
           modal.show();
@@ -107,7 +106,6 @@
         modalElement.scrollIntoView({ behavior: 'smooth' });
       });
 
-      // Form validation
       const nameInput = document.getElementById('name');
       const emailInput = document.getElementById('email');
       const checkbox = document.getElementById('privacy-agreement');
@@ -124,7 +122,6 @@
       emailInput.addEventListener('input', validateForm);
       checkbox.addEventListener('change', validateForm);
 
-      // Handle form submission to Google Apps Script
       const form = document.getElementById('resubscribeForm');
       form.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -132,7 +129,7 @@
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
 
-        fetch('YOUR_SCRIPT_URL', {
+        fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({ name, email, type: 'resubscribe' })
@@ -148,7 +145,6 @@
         });
       });
 
-      // Unsubscribe logging
       const params = new URLSearchParams(window.location.search);
       const emailParam = params.get('email');
       const emailMessage = document.getElementById('emailMessage');
@@ -156,7 +152,7 @@
 
       if (emailParam) {
         emailMessage.textContent = `You (${emailParam}) will no longer receive emails from us.`;
-        fetch('YOUR_SCRIPT_URL', {
+        fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({ email: emailParam, type: 'unsubscribe' })

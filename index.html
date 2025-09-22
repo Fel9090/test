@@ -28,11 +28,12 @@
   <p id="emailMessage">You will no longer receive emails from us.</p>
   <p class="error" id="errorMessage"></p>
 
-  <!-- Resubscribe Button -->
+  <!-- Resubscribe Button and Fallback Link -->
   <div class="text-center mt-4">
-    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resubscribeModal">
-      Resubscribe
-    </button>
+    <button class="btn btn-outline-primary" id="resubscribeBtn">Resubscribe</button>
+    <p class="mt-2">
+      If the button doesn’t work, <a href="#" id="fallbackLink">click here</a> to resubscribe.
+    </p>
   </div>
 
   <!-- Modal with Resubscribe Form -->
@@ -83,51 +84,66 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Personalize unsubscribe message
-    const params = new URLSearchParams(window.location.search);
-    const email = params.get('email');
-    const emailMessage = document.getElementById('emailMessage');
-    const errorMessage = document.getElementById('errorMessage');
+    document.addEventListener('DOMContentLoaded', function () {
+      const resubscribeBtn = document.getElementById('resubscribeBtn');
+      const fallbackLink = document.getElementById('fallbackLink');
+      const modalElement = document.getElementById('resubscribeModal');
+      const modal = new bootstrap.Modal(modalElement);
 
-    if (email) {
-      emailMessage.textContent = `You (${email}) will no longer receive emails from us.`;
-
-      fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email,
-          timestamp: new Date().toISOString()
-        })
-      })
-      .then(response => {
-        if (!response.ok) throw new Error('Failed to log unsubscribe');
-        console.log('Unsubscribe logged successfully');
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        errorMessage.textContent = 'There was a problem logging your unsubscribe. Please try again later.';
+      // Manual modal trigger
+      resubscribeBtn.addEventListener('click', function () {
+        try {
+          modal.show();
+        } catch (e) {
+          console.warn('Modal failed, showing inline fallback.');
+          modalElement.style.display = 'block';
+          modalElement.scrollIntoView({ behavior: 'smooth' });
+        }
       });
-    } else {
-      emailMessage.textContent = 'You will no longer receive emails from us. (No email address detected)';
-    }
 
-    // Enable Subscribe button when form is valid
-    const nameInput = document.getElementById('name');
-    const emailInput = document.getElementById('email');
-    const checkbox = document.getElementById('privacy-agreement');
-    const submitBtn = document.getElementById('submit');
+      // Fallback link trigger
+      fallbackLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        modalElement.style.display = 'block';
+        modalElement.scrollIntoView({ behavior: 'smooth' });
+      });
 
-    function validateForm() {
-      const nameValid = nameInput.value.trim().length >= 2;
-      const emailValid = emailInput.validity.valid;
-      const checkboxChecked = checkbox.checked;
-      submitBtn.disabled = !(nameValid && emailValid && checkboxChecked);
-    }
+      // Form validation
+      const nameInput = document.getElementById('name');
+      const emailInput = document.getElementById('email');
+      const checkbox = document.getElementById('privacy-agreement');
+      const submitBtn = document.getElementById('submit');
 
-    nameInput.addEventListener('input', validateForm);
-    emailInput.addEventListener('input', validateForm);
-    checkbox.addEventListener('change', validateForm);
+      function validateForm() {
+        const nameValid = nameInput.value.trim().length >= 2;
+        const emailValid = emailInput.validity.valid;
+        const checkboxChecked = checkbox.checked;
+        submitBtn.disabled = !(nameValid && emailValid && checkboxChecked);
+      }
+
+      nameInput.addEventListener('input', validateForm);
+      emailInput.addEventListener('input', validateForm);
+      checkbox.addEventListener('change', validateForm);
+
+      // Unsubscribe logging
+      const params = new URLSearchParams(window.location.search);
+      const email = params.get('email');
+      const emailMessage = document.getElementById('emailMessage');
+      const errorMessage = document.getElementById('errorMessage');
+
+      if (email) {
+        emailMessage.textContent = `You (${email}) will no longer receive emails from us.`;
+        fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, timestamp: new Date().toISOString() })
+        }).catch(() => {
+          console.warn('Unsubscribe logging failed silently.');
+        });
+      } else {
+        emailMessage.textContent = 'You will no longer receive emails from us. (No email address detected)';
+      }
+    });
   </script>
 </body>
 </html>

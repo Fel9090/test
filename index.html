@@ -108,11 +108,10 @@
         emailMessage.textContent = `You (${emailParam}) will no longer receive emails from us.`;
         emailInput.value = emailParam;
 
-        fetch(scriptURL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ name: 'Anonymous', email: emailParam, type: 'unsubscribe' })
-        }).catch(() => console.warn('Unsubscribe logging failed silently.'));
+        const unsubscribeURL = `${scriptURL}?name=Anonymous&email=${encodeURIComponent(emailParam)}&type=unsubscribe`;
+
+        fetch(unsubscribeURL)
+          .catch(() => console.warn('Unsubscribe logging failed silently.'));
       }
 
       resubscribeBtn.addEventListener('click', () => modal.show());
@@ -150,18 +149,15 @@
 
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
+        const type = 'resubscribe';
 
         toggleSpinner(true);
 
-        fetch(scriptURL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ name, email, type: 'resubscribe' })
-        })
-        .then(res => res.text())
-        .then(text => {
-          try {
-            const data = JSON.parse(text);
+        const resubscribeURL = `${scriptURL}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&type=${type}`;
+
+        fetch(resubscribeURL)
+          .then(res => res.json())
+          .then(data => {
             toggleSpinner(false);
             if (data.status === 'success') {
               modal.hide();
@@ -170,17 +166,12 @@
             } else {
               showAlert('error', data.message || 'There was a problem resubscribing.');
             }
-          } catch (err) {
-            console.warn('Invalid JSON:', text);
+          })
+          .catch(err => {
             toggleSpinner(false);
-            showAlert('error', 'Unexpected response from server.');
-          }
-        })
-        .catch(err => {
-          toggleSpinner(false);
-          console.error(err);
-          showAlert('error', 'There was a problem resubscribing. Please try again later.');
-        });
+            console.error(err);
+            showAlert('error', 'There was a problem resubscribing. Please try again later.');
+          });
       });
     });
   </script>

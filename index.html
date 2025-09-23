@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Unsubscribe Confirmation</title>
+  <title>Resubscribe App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -51,11 +50,11 @@
           <form id="resubscribeForm" novalidate>
             <div class="mb-3">
               <label for="name" class="form-label">Full Name</label>
-              <input type="text" class="form-control" id="name" name="name" required minlength="2" maxlength="100" autocomplete="off">
+              <input type="text" class="form-control" id="name" required minlength="2" maxlength="100">
             </div>
             <div class="mb-3">
               <label for="email" class="form-label">Email Address</label>
-              <input type="email" class="form-control" id="email" name="email" required autocomplete="off">
+              <input type="email" class="form-control" id="email" required>
             </div>
             <div class="form-check mb-3">
               <input class="form-check-input" type="checkbox" id="privacy-agreement" required>
@@ -78,12 +77,10 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const proxyURL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL'; // Replace with your deployed script URL
+      const proxyURL = 'https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec';
 
       const resubscribeBtn = document.getElementById('resubscribeBtn');
-      const modalElement = document.getElementById('resubscribeModal');
-      const modal = new bootstrap.Modal(modalElement);
-
+      const modal = new bootstrap.Modal(document.getElementById('resubscribeModal'));
       const nameInput = document.getElementById('name');
       const emailInput = document.getElementById('email');
       const checkbox = document.getElementById('privacy-agreement');
@@ -96,7 +93,6 @@
 
       const params = new URLSearchParams(window.location.search);
       const emailParam = params.get('email');
-
       if (emailParam) {
         emailMessage.textContent = `You (${emailParam}) will no longer receive emails from us.`;
         emailInput.value = emailParam;
@@ -131,50 +127,33 @@
 
       function escapeHTML(str) {
         return str.replace(/[&<>"']/g, match => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;'
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         }[match]));
       }
 
       nameInput.addEventListener('input', validateForm);
       emailInput.addEventListener('input', validateForm);
       checkbox.addEventListener('change', validateForm);
-
       validateForm();
 
       form.addEventListener('submit', function (e) {
         e.preventDefault();
-
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
         const type = 'approved';
 
         toggleSpinner(true);
+        const resubscribeURL = `${proxyURL}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&type=${type}`;
 
-        fetch(proxyURL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, type })
-        })
+        fetch(resubscribeURL)
           .then(res => res.text())
           .then(text => {
-            if (text.trim().startsWith('<!DOCTYPE html>')) {
-              throw new Error('Server returned HTML instead of JSON');
-            }
-
+            if (text.trim().startsWith('<!DOCTYPE html>')) throw new Error('Server returned HTML instead of JSON');
             let data;
-            try {
-              data = JSON.parse(text);
-            } catch (err) {
-              console.error('Invalid JSON response:', text);
-              throw new Error('Server returned non-JSON response');
-            }
+            try { data = JSON.parse(text); } 
+            catch (err) { throw new Error('Invalid JSON response'); }
 
             toggleSpinner(false);
-
             if (data.status === 'success') {
               modal.hide();
               emailMessage.innerHTML = `✅ Thank you <strong>${escapeHTML(name)}</strong>, you have successfully resubscribed with <strong>${escapeHTML(email)}</strong>.`;

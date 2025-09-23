@@ -35,7 +35,7 @@
     <button class="btn btn-outline-primary" id="resubscribeBtn" type="button">Resubscribe</button>
   </div>
 
-  <div class="text-center mt-3" id="loadingSpinner">
+  <div class="text-center mt-3" id="loadingSpinner" aria-live="polite">
     <div class="spinner-border text-primary" role="status"></div>
   </div>
 
@@ -55,12 +55,12 @@
           <form id="resubscribeForm" novalidate>
             <div class="mb-3">
               <label for="name" class="form-label">Full Name</label>
-              <input type="text" class="form-control" id="name" name="name" required minlength="2" maxlength="100" placeholder="Enter your full name">
+              <input type="text" class="form-control" id="name" name="name" required minlength="2" maxlength="100" autocomplete="off" placeholder="Enter your full name">
             </div>
 
             <div class="mb-3">
               <label for="email" class="form-label">Email Address</label>
-              <input type="email" class="form-control" id="email" name="email" required placeholder="Enter your email address">
+              <input type="email" class="form-control" id="email" name="email" required autocomplete="off" placeholder="Enter your email address">
             </div>
 
             <div class="form-check mb-3">
@@ -85,7 +85,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const scriptURL = 'https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec';
+      const proxyURL = 'https://your-worker.yourdomain.workers.dev'; // Replace with your deployed Worker URL
 
       const resubscribeBtn = document.getElementById('resubscribeBtn');
       const modalElement = document.getElementById('resubscribeModal');
@@ -108,19 +108,16 @@
         emailMessage.textContent = `You (${emailParam}) will no longer receive emails from us.`;
         emailInput.value = emailParam;
 
-        const unsubscribeURL = `${scriptURL}?name=Anonymous&email=${encodeURIComponent(emailParam)}&type=unsubscribe`;
+        const unsubscribeURL = `${proxyURL}?name=Anonymous&email=${encodeURIComponent(emailParam)}&type=unsubscribe`;
 
         fetch(unsubscribeURL)
           .catch(() => console.warn('Unsubscribe logging failed silently.'));
       }
 
       resubscribeBtn.addEventListener('click', () => {
-  modal.show();
-  setTimeout(() => {
-    nameInput.focus();
-  }, 300); // Delay to ensure modal is fully visible
-});
-
+        modal.show();
+        setTimeout(() => nameInput.focus(), 300);
+      });
 
       function isValidEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -148,7 +145,7 @@
       emailInput.addEventListener('input', validateForm);
       checkbox.addEventListener('change', validateForm);
 
-      validateForm(); // Trigger initial validation
+      validateForm();
 
       form.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -159,7 +156,7 @@
 
         toggleSpinner(true);
 
-        const resubscribeURL = `${scriptURL}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&type=${type}`;
+        const resubscribeURL = `${proxyURL}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&type=${type}`;
 
         fetch(resubscribeURL)
           .then(res => res.json())

@@ -40,7 +40,7 @@
   </div>
 
   <!-- Modal -->
-  <div class="modal fade" id="resubscribeModal" tabindex="-1" aria-labelledby="resubscribeModalLabel" aria-hidden="true">
+  <div class="modal fade" id="resubscribeModal" tabindex="-1" aria-labelledby="resubscribeModalLabel">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
@@ -114,7 +114,13 @@
           .catch(() => console.warn('Unsubscribe logging failed silently.'));
       }
 
-      resubscribeBtn.addEventListener('click', () => modal.show());
+      resubscribeBtn.addEventListener('click', () => {
+  modal.show();
+  setTimeout(() => {
+    nameInput.focus();
+  }, 300); // Delay to ensure modal is fully visible
+});
+
 
       function isValidEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

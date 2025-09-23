@@ -53,8 +53,6 @@
             <p class="text-muted">Stay updated with our latest news and updates</p>
           </div>
           <form id="resubscribeForm" novalidate>
-            <input id="csrf_token" name="csrf_token" type="hidden" value="IjFlZjkx...">
-
             <div class="mb-3">
               <label for="name" class="form-label">Full Name</label>
               <input type="text" class="form-control" id="name" name="name" required minlength="2" maxlength="100" placeholder="Enter your full name">
@@ -108,15 +106,11 @@
         emailMessage.textContent = `You (${emailParam}) will no longer receive emails from us.`;
         emailInput.value = emailParam;
 
-        fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
+        fetch('YOUR_SCRIPT_URL_HERE', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({ name: 'Anonymous', email: emailParam, type: 'unsubscribe' })
-        }).catch(() => {
-          console.warn('Unsubscribe logging failed silently.');
-        });
-      } else {
-        emailMessage.textContent = 'You will no longer receive emails from us. (No email address detected)';
+        }).catch(() => console.warn('Unsubscribe logging failed silently.'));
       }
 
       resubscribeBtn.addEventListener('click', () => modal.show());
@@ -155,31 +149,20 @@
 
         toggleSpinner(true);
 
-        fetch('https://script.google.com/macros/s/AKfycbwXd76_u-LgQ3ytgtBWGD9jQ4sihVTWVN8yUhCPICns12KluSyS0zbk_NWwsDsgeGdMbw/exec', {
+        fetch('YOUR_SCRIPT_URL_HERE', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({ name, email, type: 'resubscribe' })
         })
-        .then(res => res.text())
-        .then(text => {
+        .then(res => res.json())
+        .then(data => {
           toggleSpinner(false);
-          let status = 'error';
-          let message = 'There was a problem resubscribing.';
-
-          try {
-            const data = JSON.parse(text);
-            status = data.status;
-            message = data.message;
-          } catch (err) {
-            console.warn('Response was not valid JSON:', text);
-          }
-
-          if (status === 'success') {
+          if (data.status === 'success') {
             modal.hide();
             emailMessage.textContent = `Thank you ${name}, you have successfully resubscribed with ${email}.`;
-            showAlert('success', message);
+            showAlert('success', data.message);
           } else {
-            showAlert('error', message);
+            showAlert('error', data.message || 'There was a problem resubscribing.');
           }
         })
         .catch(err => {

@@ -28,8 +28,8 @@
   <h1>You’ve successfully unsubscribed</h1>
   <p id="emailMessage">You will no longer receive emails from us.</p>
 
-  <div class="alert alert-success d-none" id="successAlert" role="alert"></div>
-  <div class="alert alert-danger d-none" id="errorAlert" role="alert"></div>
+  <div class="alert alert-success d-none" id="successAlert" role="alert" aria-label="Success message"></div>
+  <div class="alert alert-danger d-none" id="errorAlert" role="alert" aria-label="Error message"></div>
 
   <div class="text-center mt-4">
     <button class="btn btn-outline-primary" id="resubscribeBtn" type="button">Resubscribe</button>
@@ -132,6 +132,16 @@
         loadingSpinner.style.display = show ? 'block' : 'none';
       }
 
+      function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, match => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[match]));
+      }
+
       nameInput.addEventListener('input', validateForm);
       emailInput.addEventListener('input', validateForm);
       checkbox.addEventListener('change', validateForm);
@@ -150,21 +160,35 @@
         const resubscribeURL = `${proxyURL}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&type=${type}`;
 
         fetch(resubscribeURL)
-          .then(res => res.json())
-          .then(data => {
+          .then(res => {
+            if (!res.ok) {
+              throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            return res.text();
+          })
+          .then(text => {
+            let data;
+            try {
+              data = JSON.parse(text);
+            } catch (err) {
+              console.error('Invalid JSON response:', text);
+              throw new Error('Server returned non-JSON response');
+            }
+
             toggleSpinner(false);
+
             if (data.status === 'success') {
               modal.hide();
-              emailMessage.innerHTML = `✅ Thank you <strong>${name}</strong>, you have successfully resubscribed with <strong>${email}</strong>.`;
+              emailMessage.innerHTML = `✅ Thank you <strong>${escapeHTML(name)}</strong>, you have successfully resubscribed with <strong>${escapeHTML(email)}</strong>.`;
               showAlert('success', data.message);
             } else {
-              showAlert('error', data.message || 'There was a problem resubscribing.');
+              showAlert('error', data.message ?? 'Unexpected error occurred during resubscription.');
             }
           })
           .catch(err => {
             toggleSpinner(false);
             console.error(err);
-            showAlert('error', 'There was a problem resubscribing. Please try again later.');
+            showAlert('error', err.message || 'There was a problem resubscribing. Please try again later.');
           });
       });
     });

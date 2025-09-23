@@ -78,7 +78,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const proxyURL = 'https://billowing-disk-3d90.fel-ufs28.workers.dev/';
+      const proxyURL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL'; // Replace with your deployed script URL
 
       const resubscribeBtn = document.getElementById('resubscribeBtn');
       const modalElement = document.getElementById('resubscribeModal');
@@ -100,9 +100,6 @@
       if (emailParam) {
         emailMessage.textContent = `You (${emailParam}) will no longer receive emails from us.`;
         emailInput.value = emailParam;
-
-        const unsubscribeURL = `${proxyURL}?name=Anonymous&email=${encodeURIComponent(emailParam)}&type=declined`;
-        fetch(unsubscribeURL).catch(() => console.warn('Unsubscribe logging failed silently.'));
       }
 
       resubscribeBtn.addEventListener('click', () => {
@@ -157,16 +154,17 @@
 
         toggleSpinner(true);
 
-        const resubscribeURL = `${proxyURL}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&type=${type}`;
-
-        fetch(resubscribeURL)
-          .then(res => {
-            if (!res.ok) {
-              throw new Error(`HTTP error! Status: ${res.status}`);
-            }
-            return res.text();
-          })
+        fetch(proxyURL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, type })
+        })
+          .then(res => res.text())
           .then(text => {
+            if (text.trim().startsWith('<!DOCTYPE html>')) {
+              throw new Error('Server returned HTML instead of JSON');
+            }
+
             let data;
             try {
               data = JSON.parse(text);
